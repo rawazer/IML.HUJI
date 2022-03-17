@@ -53,22 +53,22 @@ def test_multivariate_gaussian():
     expectation_vals = np.linspace(-10, 10, 200)
     for i in range(200):
         for j in range(200):
-            mu[0] = expectation_vals[j]
-            mu[2] = expectation_vals[i]
+            mu[0] = expectation_vals[i]
+            mu[2] = expectation_vals[j]
             heatmap[i][j] = mvg_est.log_likelihood(mu, cov, samples)
     plt.figure()
     plt.imshow(np.flip(heatmap, axis=0), cmap='plasma', extent=[-10, 10, -10, 10])
     plt.colorbar()
     plt.title("Heatmap of likelihood of f1 and f3 expectation values")
-    plt.xlabel("Likelihood of f1")
-    plt.ylabel("Likelihood of f3")
+    plt.xlabel("Likelihood of f3")
+    plt.ylabel("Likelihood of f1")
     plt.show()
 
     # Question 6 - Maximum likelihood
-    f3_ind, f1_ind = np.unravel_index(np.argmax(heatmap), heatmap.shape)
+    f1_ind, f3_ind = np.unravel_index(np.argmax(heatmap), heatmap.shape)
     f1 = expectation_vals[f1_ind]
     f3 = expectation_vals[f3_ind]
-    max_ll = heatmap[f3_ind][f1_ind]
+    max_ll = heatmap[f1_ind][f3_ind]
     print("argmax for f1: ", f1)
     print("argmax for f3: ", f3)
     print("maximal log-likelihood is: ", max_ll)
