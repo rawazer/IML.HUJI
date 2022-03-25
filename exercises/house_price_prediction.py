@@ -52,19 +52,24 @@ def feature_evaluation(X: pd.DataFrame, y: pd.Series, output_path: str = ".") ->
     output_path: str (default ".")
         Path to folder in which plots are saved
     """
-    raise NotImplementedError()
+    for col in X:
+        corr = X[col].cov(y) / (X[col].std() * y.std())
+        fig = px.scatter(x=[col], y=[corr], range_y=[0,1], 
+                        title=col + ", Pearson correlation = " + str(corr),
+                        labels={"x": "feature", "y": "correlation"})
+        fig.write_image(output_path + "/" + col + ".png")
 
 
 if __name__ == '__main__':
     np.random.seed(0)
     # Question 1 - Load and preprocessing of housing prices dataset
-    raise NotImplementedError()
+    X, y = load_data("datasets/house_prices.csv")
 
     # Question 2 - Feature evaluation with respect to response
-    raise NotImplementedError()
+    feature_evaluation(X, y, "./feature_eval_plots")
 
     # Question 3 - Split samples into training- and testing sets.
-    raise NotImplementedError()
+    
 
     # Question 4 - Fit model over increasing percentages of the overall training data
     # For every percentage p in 10%, 11%, ..., 100%, repeat the following 10 times:
@@ -73,4 +78,4 @@ if __name__ == '__main__':
     #   3) Test fitted model over test set
     #   4) Store average and variance of loss over test set
     # Then plot average loss as function of training size with error ribbon of size (mean-2*std, mean+2*std)
-    raise NotImplementedError()
+    
