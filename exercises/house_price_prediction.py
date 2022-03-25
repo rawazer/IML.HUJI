@@ -4,6 +4,7 @@ from IMLearn.learners.regressors import LinearRegression
 from typing import NoReturn
 import numpy as np
 import pandas as pd
+from datetime import datetime as dt
 import plotly.graph_objects as go
 import plotly.express as px
 import plotly.io as pio
@@ -23,7 +24,15 @@ def load_data(filename: str):
     Design matrix and response vector (prices) - either as a single
     DataFrame or a Tuple[DataFrame, Series]
     """
-    raise NotImplementedError()
+    df = pd.read_csv(filename)
+    df = df.drop(columns=['id', 'lat', 'long']) # will work with zipcode
+    df['date'] = pd.to_datetime(df['date'], format='%Y%m%dT%H%M%S', errors='coerce')
+    df['date'] = df['date'].apply(dt.toordinal)
+    df = pd.get_dummies(df, columns=['zipcode']) # there are four zipcodes, we'll encode them with one-hot
+    X = df.drop(columns=['price'])
+    y = df['price']
+    return X, y
+    
 
 
 def feature_evaluation(X: pd.DataFrame, y: pd.Series, output_path: str = ".") -> NoReturn:
