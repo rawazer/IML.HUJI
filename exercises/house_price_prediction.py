@@ -28,7 +28,13 @@ def load_data(filename: str):
     df = df.drop(columns=['id', 'lat', 'long']) # will work with zipcode
     df['date'] = pd.to_datetime(df['date'], format='%Y%m%dT%H%M%S', errors='coerce')
     df['date'] = df['date'].apply(dt.toordinal)
-    df = pd.get_dummies(df, columns=['zipcode']) # there are four zipcodes, we'll encode them with one-hot
+
+    df = df.dropna()
+    for col in ['date', 'price', 'sqft_living', 'sqft_lot', 'sqft_above', 'sqft_basement', 'yr_built', 'yr_renovated', 'sqft_living15', 'sqft_lot15']:
+        df = df.drop(df[df[col]<10].index)
+
+    df = pd.get_dummies(df, columns=['zipcode']) # we'll encode them with one-hot
+
     X = df.drop(columns=['price'])
     y = df['price']
     return X, y
