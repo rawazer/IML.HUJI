@@ -51,8 +51,8 @@ class LinearRegression(BaseEstimator):
         Fits model with or without an intercept depending on value of `self.include_intercept_`
         """
         if self.include_intercept_:
-            X = np.hstack(np.ones((X.shape[0], 1)), X)
-        self.coefs_ = pinv(X) @ y
+            X = np.hstack((np.ones((X.shape[0], 1)), X))
+        self.coefs_ = pinv(X) @ y.reshape((y.size, 1))
 
     def _predict(self, X: np.ndarray) -> np.ndarray:
         """
@@ -68,6 +68,8 @@ class LinearRegression(BaseEstimator):
         responses : ndarray of shape (n_samples, )
             Predicted responses of given samples
         """
+        if self.include_intercept_:
+            X = np.hstack((np.ones((X.shape[0], 1)), X))
         return X @ self.coefs_
 
     def _loss(self, X: np.ndarray, y: np.ndarray) -> float:
@@ -87,4 +89,6 @@ class LinearRegression(BaseEstimator):
         loss : float
             Performance under MSE loss function
         """
-        return mean_square_error(y, X @ self.coefs_)
+        if self.include_intercept_:
+            X = np.hstack((np.ones((X.shape[0], 1)), X))
+        return mean_square_error(y.reshape((y.size, 1)), X @ self.coefs_)
