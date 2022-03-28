@@ -75,7 +75,7 @@ if __name__ == '__main__':
     feature_evaluation(X, y, "./feature_eval_plots")
 
     # Question 3 - Split samples into training- and testing sets.
-    
+    X_train, y_train, X_test, y_test = split_train_test(X, y)
 
     # Question 4 - Fit model over increasing percentages of the overall training data
     # For every percentage p in 10%, 11%, ..., 100%, repeat the following 10 times:
@@ -84,4 +84,25 @@ if __name__ == '__main__':
     #   3) Test fitted model over test set
     #   4) Store average and variance of loss over test set
     # Then plot average loss as function of training size with error ribbon of size (mean-2*std, mean+2*std)
-    
+    percentages = np.arange(0.1, 1, 0.01)
+    mean_loss = np.empty(percentages.shape)
+    std_loss = np.empty(percentages.shape)
+    lin_reg = LinearRegression(include_intercept=True)
+    frames = []
+    for (ind, p) in enumerate(percentages):
+        losses = []
+        for i in range(10):
+            cur_X_train = X_train.sample(frac = p, random_state=i).to_numpy()
+            cur_y_train = y_train.sample(frac = p, random_state=i).to_numpy()
+            lin_reg.fit(cur_X_train, cur_y_train)
+            loss = lin_reg.loss(X_test.to_numpy(), y_test.to_numpy())
+            losses.append(loss)
+        mean_loss[ind] = np.mean(losses)
+        std_loss[ind] = np.std(losses)
+    fig = go.Figure(
+        data=[
+            go.Scatter(x=percentages, y=mean_loss, mode="markers+lines", name="loss", line=dict(dash="dash"), marker=dict(color="green", opacity=.7)),
+            go.Scatter(x=percentages, y=mean_loss + 2 * std_loss, fill=None, mode="lines", line=dict(color="lightgrey"), showlegend=False),
+            go.Scatter(x=percentages, y=mean_loss - 2 * std_loss, fill='tonexty', mode="lines", line=dict(color="lightgrey"), showlegend=False)]
+    )
+    fig.show()   
