@@ -101,8 +101,11 @@ if __name__ == '__main__':
         std_loss[ind] = np.std(losses)
     fig = go.Figure(
         data=[
-            go.Scatter(x=percentages, y=mean_loss, mode="markers+lines", name="loss", line=dict(dash="dash"), marker=dict(color="green", opacity=.7)),
+            go.Scatter(x=percentages, y=mean_loss, name="loss", mode="markers+lines", line=dict(dash="dash"), marker=dict(color="green", opacity=.7)),
             go.Scatter(x=percentages, y=mean_loss + 2 * std_loss, fill=None, mode="lines", line=dict(color="lightgrey"), showlegend=False),
             go.Scatter(x=percentages, y=mean_loss - 2 * std_loss, fill='tonexty', mode="lines", line=dict(color="lightgrey"), showlegend=False)]
     )
-    fig.show()   
+    fig.update_xaxes(title_text="Percentage")
+    fig.update_yaxes(title_text="Mean loss")
+    fig.update_layout(title="Mean loss as a function of percentage of training data used, with std")
+    fig.show()

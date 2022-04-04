@@ -87,7 +87,7 @@ if __name__ == '__main__':
     Xs = [X_jord["DayOfYear"], X_sa["DayOfYear"], X_ntl["DayOfYear"]]
     Ys = [y_jord, y_sa, y_ntl]
 
-    poly_reg = PolynomialFitting(6)
+    poly_reg = PolynomialFitting(5)
     poly_reg.fit(X_isr["DayOfYear"].to_numpy(), y_isr.to_numpy())
     for i in range(3):
         losses.append(poly_reg.loss(Xs[i].to_numpy(), Ys[i].to_numpy()))
@@ -96,5 +96,5 @@ if __name__ == '__main__':
 
     fig = px.bar(x=Countries, y=losses,
                 title="Losses of polynomial fitting to Israel for different countries",
-                labels={"y":"Loss"})
+                labels={"x":"County", "y":"Loss"})
     fig.show()
