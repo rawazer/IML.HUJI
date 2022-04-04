@@ -33,8 +33,8 @@ def split_train_test(X: pd.DataFrame, y: pd.Series, train_proportion: float = .7
         Responses of test samples
 
     """
-    n_test = np.floor(y.size * train_proportion).astype(np.int64)
-    n_train = y.size - n_test
+    n_train = np.floor(y.size * train_proportion).astype(np.int64)
+    n_test = y.size - n_train
     X_shuffled = X.sample(frac=1, random_state=2022)
     y_shuffled = y.sample(frac=1, random_state=2022)
     X_train = X_shuffled.iloc[:n_train]
