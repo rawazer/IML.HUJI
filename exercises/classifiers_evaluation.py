@@ -38,9 +38,10 @@ def run_perceptron():
     """
     for n, f in [("Linearly Separable", "linearly_separable.npy"), ("Linearly Inseparable", "linearly_inseparable.npy")]:
         # Load dataset
-        X, y = load_dataset(f)
+        X, y = load_dataset("datasets/" + f)
 
         # Fit Perceptron and record loss in each fit iteration
+        
         losses = []
         def loss_record_callback(fit: Perceptron, x: np.ndarray, y: int):
             losses.append(fit.loss(X, y))
