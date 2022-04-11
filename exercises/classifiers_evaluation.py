@@ -38,16 +38,16 @@ def run_perceptron():
     """
     for n, f in [("Linearly Separable", "linearly_separable.npy"), ("Linearly Inseparable", "linearly_inseparable.npy")]:
         # Load dataset
-        X, y = load_dataset("datasets/" + f)
+        X, resp = load_dataset("datasets/" + f)
 
         # Fit Perceptron and record loss in each fit iteration
         
         losses = []
         def loss_record_callback(fit: Perceptron, x: np.ndarray, y: int):
-            losses.append(fit.loss(X, y))
+            losses.append(fit.loss(X, resp))
 
         p = Perceptron(callback=loss_record_callback)
-        p.fit(X, y)
+        p.fit(X, resp)
         # Plot figure of loss as function of fitting iteration
         fig = go.Figure(data=go.Scatter(x=np.arange(len(losses)), y=losses))
         fig.show()
