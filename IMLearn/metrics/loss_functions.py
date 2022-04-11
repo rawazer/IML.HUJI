@@ -36,7 +36,7 @@ def misclassification_error(y_true: np.ndarray, y_pred: np.ndarray, normalize: b
     -------
     Misclassification of given predictions
     """
-    res = y_true * y_pred
+    res = np.multiply(y_true, y_pred)
     loss_idxs = res[res<0]
     loss = loss_idxs.size
     if normalize:
