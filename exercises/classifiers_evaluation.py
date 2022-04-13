@@ -50,6 +50,11 @@ def run_perceptron():
         p.fit(X, resp)
         # Plot figure of loss as function of fitting iteration
         fig = go.Figure(data=go.Scatter(x=np.arange(len(losses)), y=losses))
+        fig.update_layout(
+            title=n+" data fitting with Perceptron",
+            xaxis_title="Iterations",
+            yaxis_title="Loss"
+        )
         fig.show()
 
 
