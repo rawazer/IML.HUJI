@@ -89,25 +89,60 @@ def compare_gaussian_classifiers():
     """
     for f in ["gaussian1.npy", "gaussian2.npy"]:
         # Load dataset
-        raise NotImplementedError()
+        X, resp = load_dataset("datasets/" + f)
 
         # Fit models and predict over training set
-        raise NotImplementedError()
+        gnb = GaussianNaiveBayes()
+        lda = LDA()
+        gnb.fit(X, resp)
+        lda.fit(X, resp)
 
         # Plot a figure with two suplots, showing the Gaussian Naive Bayes predictions on the left and LDA predictions
         # on the right. Plot title should specify dataset used and subplot titles should specify algorithm and accuracy
         # Create subplots
         from IMLearn.metrics import accuracy
-        raise NotImplementedError()
+        gnb_pred = gnb.predict(X)
+        lda_pred = lda.predict(X)
+        gnb_acc = accuracy(resp, gnb_pred)
+        lda_acc = accuracy(resp, lda_pred)
+
+        fig = make_subplots(rows=1, cols=2,
+                            subplot_titles=("GaussianNaiveBayes, accuracy=" + str(gnb_acc),
+                                             "LDA, accuracy=" + str(lda_acc)))
 
         # Add traces for data-points setting symbols and colors
-        raise NotImplementedError()
+        fig.add_trace(
+            go.Scatter(mode='markers', x=X[:, 0], y=X[:, 1],
+            marker=dict(color=gnb_pred, symbol=resp)),
+            row=1, col=1
+        )
+        fig.add_trace(
+            go.Scatter(mode='markers', x=X[:, 0], y=X[:, 1], 
+            marker=dict(color=lda_pred, symbol=resp)),
+            row=1, col=2
+        )
 
         # Add `X` dots specifying fitted Gaussians' means
-        raise NotImplementedError()
-
+        fig.add_trace(
+            go.Scatter(mode='markers', x=gnb.mu_[:, 0], y=gnb.mu_[:, 1],
+            marker=dict(color='black', symbol='x')),
+            row=1, col=1
+        )
+        fig.add_trace(
+            go.Scatter(mode='markers', x=lda.mu_[:, 0], y=lda.mu_[:, 1],
+            marker=dict(color='black', symbol='x')),
+            row=1, col=2
+        )
         # Add ellipses depicting the covariances of the fitted Gaussians
-        raise NotImplementedError()
+        for i in range(gnb.classes_.size):
+            fig.add_trace(get_ellipse(gnb.mu_[i, :], gnb.vars_[i, :, :]), row=1, col=1)
+
+        for i in range(lda.classes_.size):
+            fig.add_trace(get_ellipse(lda.mu_[i, :], lda.cov_), row=1, col=2)
+        
+        fig.update_layout(title=f, showlegend=False)
+        fig.show()
+
 
 
 if __name__ == '__main__':
