@@ -76,7 +76,7 @@ class LDA(BaseEstimator):
         aks = self._cov_inv @ self.mu_.T
         bks = np.log(self.pi_) - 0.5 * np.diag(self.mu_ @ self._cov_inv @ self.mu_.T)
         predictions = X @ aks + bks
-        return self.classes_[np.argmax(predictions)]
+        return self.classes_[np.argmax(predictions, axis=1)]
 
     def likelihood(self, X: np.ndarray) -> np.ndarray:
         """
@@ -96,13 +96,13 @@ class LDA(BaseEstimator):
         if not self.fitted_:
             raise ValueError("Estimator must first be fitted before calling `likelihood` function")
 
-        const = 1 / np.sqrt(np.pow(2*np.pi, X.shape[1]) * np.norm(self.cov_))
+        const = 1 / np.sqrt(np.power(2*np.pi, X.shape[1]) * np.linalg.norm(self.cov_))
         likelihood_mat = np.empty((X.shape[0], self.classes_.size))
         for i in range(X.shape[0]):
             centered = X[i, :] - self.mu_
-            exp_arg = -0.5 * np.diag(centered.T @ self._cov_inv @ centered)
+            exp_arg = -0.5 * np.diag(centered @ self._cov_inv @ centered.T)
             total_prob = const * np.exp(exp_arg)
-            likelihood_mat[i] = total_prob
+            likelihood_mat[i, :] = total_prob
         return likelihood_mat
 
             
