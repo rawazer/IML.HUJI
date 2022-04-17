@@ -39,7 +39,16 @@ class GaussianNaiveBayes(BaseEstimator):
         y : ndarray of shape (n_samples, )
             Responses of input data to fit to
         """
-        raise NotImplementedError()
+        self.classes_, nks = np.unique(y, return_counts=True)
+        self.pi_ = nks / y.size
+
+        self.mu_ = np.empty((self.classes_.size, X.shape[1]))
+        self.vars_ = np.zeros((self.classes_.size, X.shape[1], X.shape[1]))
+        for cls, idx in enumerate(self.classes_):
+            X_group = X[y==cls, :]
+            self.mu_[idx, :] = np.sum(X_group, axis=0) / nks[idx]
+            centered_X_group = X_group - self.mu_[idx, :]
+            self.vars_[idx, :, :] = (centered_X_group.T @ centered_X_group) / nks[idx]
 
     def _predict(self, X: np.ndarray) -> np.ndarray:
         """
@@ -55,7 +64,8 @@ class GaussianNaiveBayes(BaseEstimator):
         responses : ndarray of shape (n_samples, )
             Predicted responses of given samples
         """
-        raise NotImplementedError()
+        likelihood_mat = self.likelihood(X)
+        return self.classes_[np.argmax(likelihood_mat, axis=1)]
 
     def likelihood(self, X: np.ndarray) -> np.ndarray:
         """
@@ -75,7 +85,15 @@ class GaussianNaiveBayes(BaseEstimator):
         if not self.fitted_:
             raise ValueError("Estimator must first be fitted before calling `likelihood` function")
 
-        raise NotImplementedError()
+        likelihood_mat = np.empty((X.shape[0], self.classes_.size))
+        for k in range(self.classes_.size):
+            const = 1 / np.sqrt(np.power(2*np.pi, X.shape[1]) * np.linalg.norm(self.vars_[k, :, :]))
+            centered = X - self.mu_[k, :]
+            exp_arg = -0.5 * np.diag(centered @ np.linalg.inv(self.vars_[k, :, :]) @ centered.T)
+            likelihood_mat[:, k] = const * np.exp(exp_arg)
+        return likelihood_mat
+
+
 
     def _loss(self, X: np.ndarray, y: np.ndarray) -> float:
         """
@@ -95,4 +113,4 @@ class GaussianNaiveBayes(BaseEstimator):
             Performance under missclassification loss function
         """
         from ...metrics import misclassification_error
-        raise NotImplementedError()
+        return misclassification_error(y, self.predict(X), normalize=True)
