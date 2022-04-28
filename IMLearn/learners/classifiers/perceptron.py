@@ -75,7 +75,7 @@ class Perceptron(BaseEstimator):
         """
         if self.include_intercept_:
             X = np.hstack((np.ones((y.size, 1)), X))
-        self.coefs_ = np.ones((X.shape[1]))
+        self.coefs_ = np.zeros((X.shape[1]))
         self.fitted_ = True
         for i in range(self.max_iter_):
             done = True
