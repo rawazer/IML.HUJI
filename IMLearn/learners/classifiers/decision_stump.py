@@ -111,19 +111,25 @@ class DecisionStump(BaseEstimator):
         For every tested threshold, values strictly below threshold are predicted as `-sign` whereas values
         which equal to or above the threshold are predicted as `sign`
         """
-        thr, amt = 0, 0
+        thr, matches, w_matches = 0, 0, 0
         it = np.nditer(values, flags=["c_index"])
         for cur_thr in it:
-            cur_amt = 0
+            cur_w_matches = 0
             lower_labels = labels[values < cur_thr]
+            lower_matches = lower_labels[lower_labels*sign < 0]
             upper_labels = labels[values >= cur_thr]
-            cur_amt += lower_labels[lower_labels == -1*sign].size
-            cur_amt += upper_labels[upper_labels == sign].size
-            if cur_amt > amt:
-                amt = cur_amt
+            upper_matches = upper_labels[upper_labels*sign >= 0]
+            cur_w_matches += np.abs(np.sum(lower_labels[lower_labels*sign < 0]))
+            cur_w_matches += np.abs(np.sum(upper_labels[upper_labels*sign >= 0]))
+            print(lower_labels[lower_labels*sign < 0])
+            print(upper_labels[upper_labels*sign >= 0])
+            print(cur_w_matches)
+            if cur_w_matches > w_matches:
+                w_matches = cur_w_matches
+                matches = lower_matches.size + upper_matches.size
                 thr = cur_thr.item()
         N = labels.size
-        thr_err = (N - amt) / N
+        thr_err = (N - matches) / N
         return thr, thr_err
 
     def _loss(self, X: np.ndarray, y: np.ndarray) -> float:
