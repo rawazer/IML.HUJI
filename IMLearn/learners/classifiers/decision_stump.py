@@ -121,9 +121,6 @@ class DecisionStump(BaseEstimator):
             upper_matches = upper_labels[upper_labels*sign >= 0]
             cur_w_matches += np.abs(np.sum(lower_labels[lower_labels*sign < 0]))
             cur_w_matches += np.abs(np.sum(upper_labels[upper_labels*sign >= 0]))
-            print(lower_labels[lower_labels*sign < 0])
-            print(upper_labels[upper_labels*sign >= 0])
-            print(cur_w_matches)
             if cur_w_matches > w_matches:
                 w_matches = cur_w_matches
                 matches = lower_matches.size + upper_matches.size
