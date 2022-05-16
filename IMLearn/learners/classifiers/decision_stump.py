@@ -52,7 +52,7 @@ class DecisionStump(BaseEstimator):
                 thr_err = cur_thr_err_2
                 self.threshold_ = cur_thr_2
                 self.j_ = j
-                self.sign_ = 1
+                self.sign_ = -1
 
     def _predict(self, X: np.ndarray) -> np.ndarray:
         """
@@ -111,22 +111,27 @@ class DecisionStump(BaseEstimator):
         For every tested threshold, values strictly below threshold are predicted as `-sign` whereas values
         which equal to or above the threshold are predicted as `sign`
         """
-        thr, matches, w_matches = 0, 0, 0
-        it = np.nditer(values, flags=["c_index"])
-        for cur_thr in it:
-            cur_w_matches = 0
-            lower_labels = labels[values < cur_thr]
-            lower_matches = lower_labels[lower_labels*sign < 0]
-            upper_labels = labels[values >= cur_thr]
-            upper_matches = upper_labels[upper_labels*sign >= 0]
-            cur_w_matches += np.abs(np.sum(lower_labels[lower_labels*sign < 0]))
-            cur_w_matches += np.abs(np.sum(upper_labels[upper_labels*sign >= 0]))
-            if cur_w_matches > w_matches:
-                w_matches = cur_w_matches
-                matches = lower_matches.size + upper_matches.size
-                thr = cur_thr.item()
-        N = labels.size
-        thr_err = (N - matches) / N
+        sort_idx = np.argsort(values)
+        sorted_values = values[sort_idx]
+        sorted_labels = labels[sort_idx]
+        sorted_values = np.append(sorted_values, sorted_values[-1] + 0.01)
+        sign_match, unsign_match = np.zeros(labels.size + 1), np.zeros(labels.size + 1)
+
+        for i in range(1, labels.size + 1, 1):
+            if sorted_values[i-1] < sorted_values[i] and sorted_labels[i-1]*sign < 0:
+                unsign_match[i] = unsign_match[i-1] - (sorted_labels[i-1]*sign)
+            else:
+                unsign_match[i] = unsign_match[i-1]
+            if sorted_labels[labels.size-i]*sign >= 0:
+                sign_match[labels.size-i] = sign_match[labels.size-i + 1] + sorted_labels[labels.size-i]*sign
+            else:
+                sign_match[labels.size-i] = sign_match[labels.size-i + 1]
+        
+        total_match = sign_match + unsign_match
+        matches = np.max(total_match)
+        norm_matches = matches / np.sum(np.abs(labels))
+        thr = sorted_values[np.argmax(total_match)]
+        thr_err = 1 - norm_matches
         return thr, thr_err
 
     def _loss(self, X: np.ndarray, y: np.ndarray) -> float:
