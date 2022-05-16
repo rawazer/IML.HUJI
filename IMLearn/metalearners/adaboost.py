@@ -50,16 +50,18 @@ class AdaBoost(BaseEstimator):
         """
         self.D_ = np.ones(y.size) / y.size
         self.models_ = []
+        self.weights_ = np.empty((self.iterations_))
         for t in range(self.iterations_):
             w_y = np.multiply(y, self.D_)
-            self.models_.append(self.wl())
-            self.models[t].fit(X, w_y)
-            pred = self.models_[t].predict(X, y)
-            correct = np.zeros(y.size)
-            correct[pred == y] = 1
-            epsilon = np.sum(np.multiply(self.D_, correct))
-            self.weights_ = 0.5 * np.log((1-epsilon)/epsilon)
-            self.D_ = np.multiply(self.D_, np.exp(-1 * self.weights_ * (y * pred)))
+            self.models_.append(self.wl_())
+            self.models_[t].fit(X, w_y)
+            pred = self.models_[t].predict(X)
+            incorrect = np.zeros(y.size)
+            incorrect[pred != y] = 1
+            epsilon = np.sum(np.multiply(self.D_, incorrect))
+            weight = 0.5 * np.log((1-epsilon)/epsilon)
+            self.weights_[t] = weight
+            self.D_ = np.multiply(self.D_, np.exp(-1 * weight * (y * pred)))
             self.D_ /= np.sum(self.D_)
 
     def _predict(self, X):
@@ -114,9 +116,10 @@ class AdaBoost(BaseEstimator):
         responses : ndarray of shape (n_samples, )
             Predicted responses of given samples
         """
-        predictions = np.range((T, self.models_.size))
+        predictions = np.empty((T, X.shape[0]))
         for t in range(T):
-            predictions[t, :] = np.multiply(self.models_[t].predict(X), self.weights_)
+            cur_pred = self.models_[t].predict(X)
+            predictions[t, :] = cur_pred * self.weights_[t]
         conf_predictions = np.sum(predictions, axis=0)
         conf_predictions[conf_predictions >= 0] = 1
         conf_predictions[conf_predictions < 0] = -1
